@@ -1,0 +1,8 @@
+# See https://www.spigotmc.org/wiki/create-your-first-bungeecord-plugin-proxy-spigotmc/#making-it-load
+
+name: $name
+version: $version
+description: $description
+author: $author
+
+main: ${project.group}.${project.name}.BungeeCordEntryPoint

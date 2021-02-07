@@ -1,0 +1,9 @@
+# See https://bukkit.gamepedia.com/Plugin_YAML for more information.
+
+name: $name
+version: $version
+description: $description
+author: $author
+
+main: ${group}.${name}.BukkitEntryPoint
+load: STARTUP

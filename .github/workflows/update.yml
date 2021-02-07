@@ -1,0 +1,64 @@
+name: Update
+
+on:
+  schedule:
+    - cron: "0 6,18 * * *"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    outputs:
+      kotlin: ${{ steps.fetch-kotlin-version.outputs.result }}
+      this: ${{ steps.fetch-this-version.outputs.result }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch latest Kotlin version
+        uses: seancroach/latest-stable-version-action@v1
+        id: fetch-kotlin-version
+        with:
+          owner: JetBrains
+          repo: kotlin
+
+      - name: Fetch latest tag
+        uses: seancroach/latest-stable-version-action@v1
+        id: fetch-this-version
+        with:
+          owner: aetherite-dev
+          repo: kotlin
+
+  update:
+    runs-on: ubuntu-latest
+    needs: fetch-versions
+    if: ${{ needs.fetch.outputs.kotlin }} != ${{ needs.fetch.outputs.this }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
+
+      - name: Download Java 11
+        uses: actions/setup-java@v1
+        with:
+          # Minimum required version for spotless dependencies
+          java-version: 11
+
+      - name: Update plugin
+        run: gradle build -Pversion=${{ needs.fetch.outputs.kotlin }}
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "chore(release): v${{ needs.fetch.outputs.kotlin }}" --no-verify
+
+      - name: Create tag
+        run: git tag v${{ needs.fetch.outputs.kotlin }}
+
+      - name: Push changes
+        run: git push v${{ needs.fetch.outputs.kotlin }} --no-verify

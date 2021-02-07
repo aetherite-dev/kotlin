@@ -1,0 +1,71 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
+
+      - name: Download Java 11
+        uses: actions/setup-java@v1
+        with:
+          # Minimum required version for spotless dependencies
+          java-version: 11
+
+      - name: Download Node.js latest
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: "*"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build publications
+        run: ./gradlew build
+
+      - name: Import gpg key
+        run: cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
+
+      - name: Publish publications
+        run: ./gradlew publish -Psigning.gnupg.passphrase=${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }} -Psigning.gnupg.keyName=${{ secrets.GPG_KEY_ID }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+
+      - name: Create GitHub release
+        id: release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+
+      - name: Fetch cleaned semver version
+        id: fetch
+        uses: seancroach/latest-stable-version-action@v1
+        with:
+          owner: JetBrains
+          repo: kotlin
+
+      - name: Upload plugin jar
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ./build/libs/kotlin-${{ steps.fetch.outputs.result }}.jar
+          asset_name: kotlin-${{ steps.fetch.outputs.result }}.jar
+          asset_content_type: application/java-archive

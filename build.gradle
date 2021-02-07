@@ -1,0 +1,107 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'signing'
+
+    id 'com.diffplug.spotless' version '5.9.0'
+    id 'org.jetbrains.kotlin.jvm' // Kotlin version set dynamically from 'settings.gradle'
+}
+
+group 'dev.aetherite'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://papermc.io/repo/repository/maven-public' }
+}
+
+dependencies {
+    compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly 'io.github.waterfallmc:waterfall-api:1.16-R0.4-SNAPSHOT'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      pom {
+        name = "$name"
+        description = "$description"
+        url = 'https://github.com/aetherite-dev/kotlin'
+        licenses {
+          license {
+            name = 'The MIT License'
+            url = 'https://github.com/aetherite-dev/kotlin/blob/main/LICENSE.md'
+          }
+        }
+        developers {
+          developer {
+            id = 'seancroach'
+            name = 'Sean C. Roach'
+            email = 'me@seancroach.dev'
+          }
+        }
+        scm {
+          connection = 'scm:git:git://github.com/aetherite-dev/kotlin.git'
+          developerConnection = 'scm:git:ssh://github.com/aetherite-dev/kotlin.git'
+          url = 'https://github.com/aetherite-dev/kotlin'
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      name = 'GitHubPackages'
+      url = 'https://maven.pkg.github.com/aetherite-dev/kotlin'
+      credentials {
+        username = System.getenv('GITHUB_ACTOR')
+        password = System.getenv('GITHUB_TOKEN')
+      }
+    }
+    maven {
+      name = "OSSRH"
+      url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+      credentials {
+        username = System.getenv("OSSRH_USERNAME")
+        password = System.getenv("OSSRH_PASSWORD")
+      }
+    }
+  }
+}
+
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
+
+processResources {
+    expand(project.properties)
+}
+
+signing {
+  useGpgCmd()
+  sign publishing.publications.maven
+}
+
+spotless {
+    kotlin {
+        ktlint().userData(['indent_size': 'unset'])
+        ktfmt()
+    }
+}
+
+tasks.named('build') {
+  doLast {
+    copy {
+      from "docs/src"
+      exclude "README.md"
+      expand project.properties
+      into "docs/generated"
+    }
+    copy {
+      from "docs/src"
+      include "README.md"
+      expand project.properties
+      into "."
+    }
+  }
+}

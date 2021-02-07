@@ -1,0 +1,12 @@
+// Have to use this "pluginManagement" block because "pluginManagement.plugins"
+// DO NOT have the same constrained syntax as a build script's "plugins" block.
+// This will let us dynamically load which version of Kotlin to use, which is
+// helpful for automated deployment.
+// See https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_version_management
+pluginManagement {
+    plugins {
+        id 'org.jetbrains.kotlin.jvm' version "$version"
+    }
+}
+
+rootProject.name = 'kotlin'
