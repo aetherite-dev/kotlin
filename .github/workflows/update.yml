@@ -18,14 +18,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Fetch latest Kotlin version
-        uses: seancroach/latest-stable-version-action@v1
+        uses: seancroach/latest-stable-version-action@master
         id: fetch-kotlin-version
         with:
           owner: JetBrains
           repo: kotlin
 
       - name: Fetch latest tag
-        uses: seancroach/latest-stable-version-action@v1
+        uses: seancroach/latest-stable-version-action@master
         id: fetch-this-version
         with:
           owner: aetherite-dev

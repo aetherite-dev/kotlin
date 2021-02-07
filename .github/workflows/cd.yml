@@ -55,7 +55,7 @@ jobs:
 
       - name: Fetch cleaned semver version
         id: fetch
-        uses: seancroach/latest-stable-version-action@v1
+        uses: seancroach/latest-stable-version-action@master
         with:
           owner: JetBrains
           repo: kotlin
