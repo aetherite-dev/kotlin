@@ -2,7 +2,7 @@ name: Update
 
 on:
   schedule:
-    - cron: "0 6,18 * * *"
+    - cron: "0 0,6,12,18 * * *"
 
 jobs:
   fetch:
@@ -14,9 +14,6 @@ jobs:
       this: ${{ steps.fetch-this-version.outputs.result }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Fetch latest Kotlin version
         uses: seancroach/latest-stable-version-action@master
         id: fetch-kotlin-version
@@ -33,7 +30,7 @@ jobs:
 
   update:
     runs-on: ubuntu-latest
-    needs: fetch-versions
+    needs: fetch
     if: ${{ needs.fetch.outputs.kotlin }} != ${{ needs.fetch.outputs.this }}
 
     steps:
@@ -42,14 +39,13 @@ jobs:
         with:
           token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
 
-      - name: Download Java 11
+      - name: Download Java Latest
         uses: actions/setup-java@v1
         with:
-          # Minimum required version for spotless dependencies
-          java-version: 11
+          java-version: 15
 
       - name: Update plugin
-        run: gradle build -Pversion=${{ needs.fetch.outputs.kotlin }}
+        run: ./gradlew build -Pversion=${{ needs.fetch.outputs.kotlin }}
 
       - name: Commit changes
         run: |
@@ -61,4 +57,4 @@ jobs:
         run: git tag v${{ needs.fetch.outputs.kotlin }}
 
       - name: Push changes
-        run: git push v${{ needs.fetch.outputs.kotlin }} --no-verify
+        run: git push origin v${{ needs.fetch.outputs.kotlin }} --no-verify

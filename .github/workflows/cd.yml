@@ -14,11 +14,10 @@ jobs:
         with:
           token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
 
-      - name: Download Java 11
+      - name: Download Java Latest
         uses: actions/setup-java@v1
         with:
-          # Minimum required version for spotless dependencies
-          java-version: 11
+          java-version: 15
 
       - name: Download Node.js latest
         uses: actions/setup-node@v2-beta
