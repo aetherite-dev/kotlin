@@ -21,6 +21,9 @@ jobs:
           owner: JetBrains
           repo: kotlin
 
+      - name: Log latest Kotlin version
+        run: echo ${{ steps.fetch-kotlin-version.outputs.result }}
+
       - name: Fetch latest tag
         uses: seancroach/latest-stable-version-action@main
         id: fetch-this-version
@@ -28,10 +31,13 @@ jobs:
           owner: aetherite-dev
           repo: kotlin
 
+      - name: Log this latest version
+        run: echo ${{ steps.fetch-this-version.outputs.result }}
+
   update:
     runs-on: ubuntu-latest
     needs: fetch
-    if: ${{ needs.fetch.outputs.kotlin }} != ${{ needs.fetch.outputs.this }}
+    if: needs.fetch.outputs.kotlin != needs.fetch.outputs.this
 
     steps:
       - name: Checkout code

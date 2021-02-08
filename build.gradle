@@ -24,8 +24,8 @@ publishing {
   publications {
     maven(MavenPublication) {
       pom {
-        name = "$name"
-        description = "$description"
+        name = project.getProperty("name")
+        description = project.getProperty("description")
         url = 'https://github.com/aetherite-dev/kotlin'
         licenses {
           license {
