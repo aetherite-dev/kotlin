@@ -2,7 +2,7 @@ name: Update
 
 on:
   schedule:
-    - cron: "0 0,6,12,18 * * *"
+    - cron: "0 * * * *"
 
 jobs:
   fetch:
@@ -15,14 +15,14 @@ jobs:
 
     steps:
       - name: Fetch latest Kotlin version
-        uses: seancroach/latest-stable-version-action@master
+        uses: seancroach/latest-stable-version-action@main
         id: fetch-kotlin-version
         with:
           owner: JetBrains
           repo: kotlin
 
       - name: Fetch latest tag
-        uses: seancroach/latest-stable-version-action@master
+        uses: seancroach/latest-stable-version-action@main
         id: fetch-this-version
         with:
           owner: aetherite-dev
