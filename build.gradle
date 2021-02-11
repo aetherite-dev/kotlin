@@ -23,6 +23,7 @@ dependencies {
 publishing {
   publications {
     maven(MavenPublication) {
+      from components.java
       pom {
         name = project.getProperty("name")
         description = project.getProperty("description")
